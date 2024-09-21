@@ -1,4 +1,7 @@
+import pytest
+
 from main import BooksCollector
+
 
 # класс TestBooksCollector объединяет набор тестов, которыми мы покрываем наше приложение BooksCollector
 # обязательно указывать префикс Test
@@ -24,7 +27,7 @@ class TestBooksCollector:
 
     def test_set_book_genre_added_one_book_with_genre_get_one_book_with_genre(self, collector):
         collector.add_new_book('Гарри Поттер')
-        collector.set_book_genre('Гарри Поттер','Ужасы')
+        collector.set_book_genre('Гарри Поттер', 'Ужасы')
         assert collector.get_book_genre('Гарри Поттер') == 'Ужасы'
 
     def test_get_book_genre_zero_books_empty_list(self, collector):
@@ -32,7 +35,7 @@ class TestBooksCollector:
 
     def test_get_book_genre_one_book_with_genre_get_genre_of_book(self, collector):
         collector.add_new_book('Гарри Поттер')
-        collector.set_book_genre('Гарри Поттер','Ужасы')
+        collector.set_book_genre('Гарри Поттер', 'Ужасы')
         assert collector.get_book_genre('Гарри Поттер') is 'Ужасы'
 
     def test_get_books_with_specific_genre_zero_books_empty_list(self, collector):
@@ -40,18 +43,22 @@ class TestBooksCollector:
 
     def test_get_books_genre_added_one_book_book_received(self, collector):
         collector.add_new_book('Гарри Поттер')
-        assert collector.get_books_genre() == {'Гарри Поттер':''}
+        assert collector.get_books_genre() == {'Гарри Поттер': ''}
+
+    def test_get_books_for_children_added_one_book_with_genre_get_empty_list(self, collector):
+        collector.add_new_book('Гарри Поттер')
+        collector.set_book_genre('Гарри Поттер', 'Ужасы')
+        assert collector.get_books_for_children() == []
 
     def test_get_books_for_children_added_one_book_with_genre_get_one_book_with_genre_for_children(self, collector):
-        collector.add_new_book('Гарри Поттер')
-        collector.set_book_genre('Гарри Поттер','Ужасы')
-        assert collector.get_books_for_children() == []
+        collector.add_new_book('Грокаем алгоритмы')
+        collector.set_book_genre('Грокаем алгоритмы', 'Комедии')
+        assert collector.get_books_for_children() == ['Грокаем алгоритмы']
 
     def test_add_book_in_favorites_added_one_book_with_genre_get_one_book_in_favorites(self, collector):
         collector.add_new_book('Гарри Поттер')
         collector.add_book_in_favorites('Гарри Поттер')
         assert 'Гарри Поттер' in collector.get_list_of_favorites_books()
-
 
     def test_delete_book_from_favorites_one_book_get_empty_list(self, collector):
         collector.add_new_book('Гарри Поттер')
@@ -61,3 +68,27 @@ class TestBooksCollector:
 
     def test_get_list_of_favorites_books_empty_list_get_empty_list(self, collector):
         assert collector.get_list_of_favorites_books() == []
+
+    @pytest.mark.parametrize('books',['Гарри Поттер','Бобби Коттер','Кори Флоттер'])
+    def test_add_new_book_add_3_books_get_dictionary_with_3_books(self, collector, books):
+        collector.add_new_book(books)
+        assert collector.get_books_genre() == {books:''}
+
+    @pytest.mark.parametrize(
+        'book_length,adding_a_book',
+        [
+            ['', False],
+            ['1', True],
+            ["Вчетвергчетвёртогочиславчетыресчетве(40)", True],
+            ['Вчетвергчетвёртогочиславчетыресчетвер(41)', False]
+        ]
+    )
+    def test_add_new_book_add_4_books_check_that_2_are_on_the_dictionary(self, collector, book_length, adding_a_book):
+        length_of_the_dictionary = len(collector.get_books_genre())
+        collector.add_new_book(book_length)
+        if adding_a_book:
+            assert len(collector.get_books_genre()) == length_of_the_dictionary + 1
+        else:
+            assert len(collector.get_books_genre()) == length_of_the_dictionary
+
+
